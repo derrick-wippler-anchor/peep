@@ -47,7 +47,7 @@ func Run(args []string, env []string, stdout, stderr io.Writer) error {
 
 	// Validate the directory exists.
 	if _, err := os.Stat(dir); err != nil {
-		fmt.Fprintf(stderr, "directory %s does not exist\n", dir)
+		_, _ = fmt.Fprintf(stderr, "directory %s does not exist\n", dir)
 		return err
 	}
 
@@ -56,7 +56,7 @@ func Run(args []string, env []string, stdout, stderr io.Writer) error {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		if strings.Contains(err.Error(), "address already in use") {
-			fmt.Fprintf(stderr, "port %d is already in use\n", port)
+			_, _ = fmt.Fprintf(stderr, "port %d is already in use\n", port)
 		}
 		return err
 	}
@@ -80,9 +80,9 @@ func Run(args []string, env []string, stdout, stderr io.Writer) error {
 
 	// Print startup URL.
 	if webHost != "" {
-		fmt.Fprintf(stdout, "https://%d-%s/\n", port, webHost)
+		_, _ = fmt.Fprintf(stdout, "https://%d-%s/\n", port, webHost)
 	} else {
-		fmt.Fprintf(stdout, "http://localhost:%d\n", port)
+		_, _ = fmt.Fprintf(stdout, "http://localhost:%d\n", port)
 	}
 
 	return http.Serve(listener, newHandler(dir, b))

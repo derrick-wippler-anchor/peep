@@ -81,7 +81,7 @@ func (h *handler) serveSSE(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case <-ch:
-			fmt.Fprint(w, "data: reload\n\n")
+			_, _ = fmt.Fprint(w, "data: reload\n\n")
 			if ok {
 				flusher.Flush()
 			}
@@ -178,7 +178,7 @@ func (h *handler) serveHTML(w http.ResponseWriter, r *http.Request, resolved str
 	body := strings.Replace(string(data), "</body>", reloadScript+"</body>", 1)
 
 	w.Header().Set("Content-Type", "text/html")
-	fmt.Fprint(w, body)
+	_, _ = fmt.Fprint(w, body)
 }
 
 // serveStatic serves raw file bytes with a Content-Type detected from the extension.
@@ -195,5 +195,5 @@ func (h *handler) serveStatic(w http.ResponseWriter, r *http.Request, resolved s
 		w.Header().Set("Content-Type", ct)
 	}
 
-	w.Write(data)
+	_, _ = w.Write(data)
 }

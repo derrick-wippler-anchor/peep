@@ -26,7 +26,7 @@ func startServer(t *testing.T, dir string, extraArgs []string, env []string) (in
 	ln, err := net.Listen("tcp", ":0")
 	require.NoError(t, err)
 	port := ln.Addr().(*net.TCPAddr).Port
-	ln.Close()
+	_ = ln.Close()
 
 	var stdout, stderr bytes.Buffer
 
@@ -43,7 +43,7 @@ func startServer(t *testing.T, dir string, extraArgs []string, env []string) (in
 	for time.Now().Before(deadline) {
 		resp, err := http.Get(fmt.Sprintf("http://localhost:%d/", port))
 		if err == nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			break
 		}
 		time.Sleep(10 * time.Millisecond)
@@ -61,13 +61,13 @@ func TestRunServesMarkdownFile(t *testing.T) {
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/hello.md", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.Contains(t, resp.Header.Get("Content-Type"), "text/html")
 
 	var body bytes.Buffer
-	body.ReadFrom(resp.Body)
+	_, _ = body.ReadFrom(resp.Body)
 	assert.Contains(t, body.String(), "<h1>")
 }
 
@@ -80,12 +80,12 @@ func TestRunServesDirectory(t *testing.T) {
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var body bytes.Buffer
-	body.ReadFrom(resp.Body)
+	_, _ = body.ReadFrom(resp.Body)
 	assert.Contains(t, body.String(), "readme.md")
 }
 
@@ -98,12 +98,12 @@ func TestRunServesDirectoryWithSubdirectory(t *testing.T) {
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var body bytes.Buffer
-	body.ReadFrom(resp.Body)
+	_, _ = body.ReadFrom(resp.Body)
 	// Directory entries are linked with trailing slash.
 	assert.Contains(t, body.String(), "docs")
 }
@@ -119,12 +119,12 @@ func TestRunServesSubdirectory(t *testing.T) {
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/docs/", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	var body bytes.Buffer
-	body.ReadFrom(resp.Body)
+	_, _ = body.ReadFrom(resp.Body)
 	assert.Contains(t, body.String(), "guide.md")
 }
 
@@ -135,10 +135,10 @@ func TestRunServesDirectoryContainsReloadScript(t *testing.T) {
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var body bytes.Buffer
-	body.ReadFrom(resp.Body)
+	_, _ = body.ReadFrom(resp.Body)
 	assert.Contains(t, body.String(), "/__reload")
 }
 
@@ -152,10 +152,10 @@ func TestRunServesHTMLWithReloadScript(t *testing.T) {
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/page.html", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var body bytes.Buffer
-	body.ReadFrom(resp.Body)
+	_, _ = body.ReadFrom(resp.Body)
 	bodyStr := body.String()
 
 	assert.Contains(t, bodyStr, "/__reload")
@@ -175,13 +175,13 @@ func TestRunServesStaticFile(t *testing.T) {
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/style.css", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.Contains(t, resp.Header.Get("Content-Type"), "text/css")
 
 	var body bytes.Buffer
-	body.ReadFrom(resp.Body)
+	_, _ = body.ReadFrom(resp.Body)
 	assert.Equal(t, cssContent, body.String())
 }
 
@@ -192,7 +192,7 @@ func TestRunPathTraversalReturns404(t *testing.T) {
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/../etc/passwd", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 }
@@ -204,7 +204,7 @@ func TestRunNotFound(t *testing.T) {
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/nonexistent.txt", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Equal(t, http.StatusNotFound, resp.StatusCode)
 }
@@ -239,7 +239,7 @@ func TestRunDefaultPort(t *testing.T) {
 	if err != nil {
 		t.Skip("port 8080 is already in use; skipping default port test")
 	}
-	defer ln.Close()
+	defer func() { _ = ln.Close() }()
 
 	dir := t.TempDir()
 	var stdout, stderr bytes.Buffer
@@ -256,7 +256,7 @@ func TestRunPortConflict(t *testing.T) {
 	ln, err := net.Listen("tcp", ":0")
 	require.NoError(t, err)
 	port := ln.Addr().(*net.TCPAddr).Port
-	defer ln.Close()
+	defer func() { _ = ln.Close() }()
 
 	dir := t.TempDir()
 	var stdout, stderr bytes.Buffer
@@ -289,7 +289,7 @@ func TestRunPortFlagAlias(t *testing.T) {
 	ln, err := net.Listen("tcp", ":0")
 	require.NoError(t, err)
 	port := ln.Addr().(*net.TCPAddr).Port
-	ln.Close()
+	_ = ln.Close()
 
 	var stdout, stderr bytes.Buffer
 
@@ -305,7 +305,7 @@ func TestRunPortFlagAlias(t *testing.T) {
 	for time.Now().Before(deadline) {
 		resp, err := http.Get(fmt.Sprintf("http://localhost:%d/", port))
 		if err == nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			lastErr = nil
 			break
 		}
@@ -327,7 +327,7 @@ func TestRunSSELiveReload(t *testing.T) {
 	// Connect to the SSE endpoint and keep the connection open.
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/__reload", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	events := make(chan string, 1)
 	go func() {
@@ -361,7 +361,7 @@ func TestRunSSEHeaders(t *testing.T) {
 
 	resp, err := http.Get(fmt.Sprintf("http://localhost:%d/__reload", port))
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	assert.Contains(t, resp.Header.Get("Content-Type"), "text/event-stream")
 	assert.Equal(t, "no-cache", resp.Header.Get("Cache-Control"))
