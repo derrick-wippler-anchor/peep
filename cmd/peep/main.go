@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/derrick-wippler-anchor/host/internal/server"
+	"github.com/derrick-wippler-anchor/peep/internal/server"
 )
 
 func main() {

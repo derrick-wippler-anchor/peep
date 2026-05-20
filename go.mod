@@ -1,4 +1,4 @@
-module github.com/derrick-wippler-anchor/host
+module github.com/derrick-wippler-anchor/peep
 
 go 1.26.1
 

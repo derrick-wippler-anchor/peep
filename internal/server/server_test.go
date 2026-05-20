@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/derrick-wippler-anchor/host/internal/server"
+	"github.com/derrick-wippler-anchor/peep/internal/server"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
