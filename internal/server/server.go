@@ -28,7 +28,7 @@ type Config struct {
 // to stdout, and blocks until the server exits. On startup failure it writes a
 // message to stderr and returns a non-nil error.
 func Run(args []string, env []string, stdout, stderr io.Writer) error {
-	fs := flag.NewFlagSet("host", flag.ContinueOnError)
+	fs := flag.NewFlagSet("serve", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 
 	var port int
