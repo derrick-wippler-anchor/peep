@@ -17,7 +17,11 @@ type handler struct {
 }
 
 func newHandler(root string, b *broker) *handler {
-	return &handler{root: root, broker: b}
+	abs, err := filepath.Abs(root)
+	if err != nil {
+		abs = root
+	}
+	return &handler{root: abs, broker: b}
 }
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +52,12 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// Dispatch based on type.
 	if info.IsDir() {
-		h.serveDirectory(w, r, resolved)
+		// Redirect to trailing-slash form so relative links resolve correctly.
+		if !strings.HasSuffix(r.URL.Path, "/") {
+			http.Redirect(w, r, r.URL.Path+"/", http.StatusMovedPermanently)
+			return
+		}
+		h.serveDirectory(w, r, r.URL.Path, resolved)
 		return
 	}
 
@@ -93,12 +102,20 @@ func (h *handler) serveSSE(w http.ResponseWriter, r *http.Request) {
 
 // dirEntry holds one directory listing entry for the template.
 type dirEntry struct {
-	Name string
-	Href string
+	Name  string
+	Href  string
+	IsDir bool
+}
+
+// dirData is the template context for the directory listing page.
+type dirData struct {
+	Path       string
+	ShowParent bool
+	Entries    []dirEntry
 }
 
 // serveDirectory renders the directory listing using the directory.html template.
-func (h *handler) serveDirectory(w http.ResponseWriter, r *http.Request, resolved string) {
+func (h *handler) serveDirectory(w http.ResponseWriter, r *http.Request, urlPath, resolved string) {
 	entries, err := os.ReadDir(resolved)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -109,10 +126,17 @@ func (h *handler) serveDirectory(w http.ResponseWriter, r *http.Request, resolve
 	for _, e := range entries {
 		name := e.Name()
 		href := name
-		if e.IsDir() {
+		isDir := e.IsDir()
+		if isDir {
 			href = name + "/"
 		}
-		items = append(items, dirEntry{Name: name, Href: href})
+		items = append(items, dirEntry{Name: name, Href: href, IsDir: isDir})
+	}
+
+	data := dirData{
+		Path:       urlPath,
+		ShowParent: urlPath != "/",
+		Entries:    items,
 	}
 
 	tmplBytes, err := templateFS.ReadFile("templates/directory.html")
@@ -128,8 +152,7 @@ func (h *handler) serveDirectory(w http.ResponseWriter, r *http.Request, resolve
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	if err := tmpl.Execute(w, items); err != nil {
-		// Headers already sent; can't change status code.
+	if err := tmpl.Execute(w, data); err != nil {
 		return
 	}
 }
