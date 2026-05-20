@@ -1,4 +1,4 @@
 .PHONY: install
 
 install:
-	go install ./cmd/serve
+	go install ./cmd/peep
