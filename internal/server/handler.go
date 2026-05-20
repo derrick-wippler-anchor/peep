@@ -102,9 +102,10 @@ func (h *handler) serveSSE(w http.ResponseWriter, r *http.Request) {
 
 // dirEntry holds one directory listing entry for the template.
 type dirEntry struct {
-	Name  string
-	Href  string
-	IsDir bool
+	Name       string
+	Href       string
+	IsDir      bool
+	IsMarkdown bool
 }
 
 // dirData is the template context for the directory listing page.
@@ -130,7 +131,7 @@ func (h *handler) serveDirectory(w http.ResponseWriter, r *http.Request, urlPath
 		if isDir {
 			href = name + "/"
 		}
-		items = append(items, dirEntry{Name: name, Href: href, IsDir: isDir})
+		items = append(items, dirEntry{Name: name, Href: href, IsDir: isDir, IsMarkdown: !isDir && strings.HasSuffix(name, ".md")})
 	}
 
 	data := dirData{
@@ -158,10 +159,17 @@ func (h *handler) serveDirectory(w http.ResponseWriter, r *http.Request, urlPath
 }
 
 // serveMarkdown renders a .md file as HTML wrapped in the markdown.html template.
+// If the request includes a ?raw query parameter, the raw source is served as text/plain.
 func (h *handler) serveMarkdown(w http.ResponseWriter, r *http.Request, resolved string) {
 	src, err := os.ReadFile(resolved)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, ok := r.URL.Query()["raw"]; ok {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		_, _ = w.Write(src)
 		return
 	}
 

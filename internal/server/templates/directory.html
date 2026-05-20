@@ -49,12 +49,24 @@ td.icon {
   color: #6a737d;
   font-size: 1rem;
 }
+td.raw {
+  width: 3rem;
+  text-align: right;
+  padding-left: 0;
+}
 a {
   color: #0366d6;
   text-decoration: none;
 }
 a:hover {
   text-decoration: underline;
+}
+a.raw {
+  font-size: 0.75rem;
+  color: #6a737d;
+}
+a.raw:hover {
+  color: #0366d6;
 }
 </style>
 </head>
@@ -71,6 +83,7 @@ a:hover {
 <tr>
   <td class="icon">{{if .IsDir}}&#128193;{{else}}&#128196;{{end}}</td>
   <td><a href="{{.Href}}">{{.Name}}{{if .IsDir}}/{{end}}</a></td>
+  <td class="raw">{{if .IsMarkdown}}<a class="raw" href="{{.Href}}?raw">raw</a>{{end}}</td>
 </tr>
 {{end}}
 </table>
