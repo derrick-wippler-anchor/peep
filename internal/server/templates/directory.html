@@ -1,15 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{.Path}}</title>
 <style>
+/* Design tokens — canonical source: mono-repo .claude/skills/html-docs/template.html */
+:root {
+  --bg: #0d1117;          /* page canvas              (colors.background)    */
+  --panel: #161b22;       /* cards, callouts          (colors.surface)       */
+  --border: #30363d;      /* hairline borders         (colors.border)        */
+  --text: #e6edf3;        /* body text                (colors.onBackground)  */
+  --muted: #9da7b3;       /* supporting text          (colors.onBackgroundMuted) */
+  --accent: #58a6ff;      /* links, emphasis (blue)   (colors.primary)       */
+}
 * { box-sizing: border-box; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  color: #24292e;
+  background: var(--bg);
+  color: var(--text);
   max-width: 860px;
   margin: 0 auto;
   padding: 2rem 1rem;
@@ -17,27 +28,27 @@ body {
 h1 {
   font-size: 1rem;
   font-weight: 600;
-  color: #586069;
+  color: var(--muted);
   margin: 0 0 1rem 0;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid #e1e4e8;
+  border-bottom: 1px solid var(--border);
   word-break: break-all;
 }
 table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #e1e4e8;
+  border: 1px solid var(--border);
   border-radius: 6px;
   overflow: hidden;
 }
 tr {
-  border-top: 1px solid #e1e4e8;
+  border-top: 1px solid var(--border);
 }
 tr:first-child {
   border-top: none;
 }
 tr:hover {
-  background-color: #f6f8fa;
+  background-color: var(--panel);
 }
 td {
   padding: 0.5rem 1rem;
@@ -46,7 +57,7 @@ td {
 td.icon {
   width: 2rem;
   padding-right: 0;
-  color: #6a737d;
+  color: var(--muted);
   font-size: 1rem;
 }
 td.raw {
@@ -55,7 +66,7 @@ td.raw {
   padding-left: 0;
 }
 a {
-  color: #0366d6;
+  color: var(--accent);
   text-decoration: none;
 }
 a:hover {
@@ -63,10 +74,10 @@ a:hover {
 }
 a.raw {
   font-size: 0.75rem;
-  color: #6a737d;
+  color: var(--muted);
 }
 a.raw:hover {
-  color: #0366d6;
+  color: var(--accent);
 }
 </style>
 </head>
