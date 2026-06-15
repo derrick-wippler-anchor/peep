@@ -40,7 +40,9 @@ func RenderMarkdown(src []byte) ([]byte, error) {
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
-			highlighting.NewHighlighting(),
+			highlighting.NewHighlighting(
+				highlighting.WithStyle("github-dark"),
+			),
 		),
 	)
 
